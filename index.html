@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#082b31" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Satellite Imagery Sources for Earthwatch</title>
+  <style>
+    :root{
+      color-scheme:light dark;
+      --bg:#edf3f2; --paper:#ffffff; --ink:#102124; --muted:#53696d; --line:#cbd9d7;
+      --nav:#082b31; --nav-ink:#eaf8f5; --accent:#0f756f; --accent-2:#d76d32; --soft:#dcebea;
+      --blue:#317da8; --water:#287f9b; --fire:#b65028; --elev:#66704e; --code:#102c31;
+      --shadow:0 18px 50px rgba(6,35,39,.09); --radius:14px;
+    }
+    @media (prefers-color-scheme:dark){
+      :root{--bg:#071619;--paper:#0c2226;--ink:#e7f3f1;--muted:#9db5b7;--line:#244247;--nav:#061f24;--nav-ink:#ecfaf7;--accent:#55bcb0;--accent-2:#f19a64;--soft:#14363a;--blue:#70afd1;--water:#64b9cf;--fire:#ee966a;--elev:#aab790;--code:#06191d;--shadow:0 18px 54px rgba(0,0,0,.24)}
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:22px}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",sans-serif;font-size:16px;line-height:1.5}
+    a{color:var(--accent);text-underline-offset:3px}
+    button{font:inherit}
+    .shell{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}
+    .rail{position:sticky;top:0;height:100vh;background:var(--nav);color:var(--nav-ink);padding:28px 22px;overflow:auto}
+    .rail-mark{display:flex;gap:12px;align-items:center;margin-bottom:34px}
+    .orb{width:38px;height:38px;border:1px solid rgba(255,255,255,.35);border-radius:50%;position:relative;flex:none}
+    .orb:before{content:"";position:absolute;width:48px;height:13px;border:1px solid #77cfc4;border-radius:50%;transform:rotate(-24deg);left:-6px;top:11px}
+    .orb:after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:#ef8a52;right:-4px;top:9px;box-shadow:0 0 0 3px rgba(239,138,82,.16)}
+    .rail-mark strong{font-size:13px;letter-spacing:.08em;text-transform:uppercase;line-height:1.2}
+    .rail-mark span{display:block;color:#9dc4c1;font-size:11px;margin-top:3px}
+    .nav-label{font:500 10px/1 "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.12em;color:#70a09d;margin:0 0 10px}
+    .rail nav{display:grid;gap:3px}
+    .rail nav a{display:flex;align-items:center;gap:10px;color:#c7dcda;text-decoration:none;padding:8px 9px;border-radius:7px;font-size:13px}
+    .rail nav a:hover,.rail nav a.active{background:rgba(255,255,255,.08);color:#fff}
+    .rail nav i{width:5px;height:5px;background:#4b8986;border-radius:50%}
+    .rail-note{margin-top:30px;border-top:1px solid rgba(255,255,255,.12);padding-top:16px;color:#9dbdbb;font-size:11px;line-height:1.55}
+    main{min-width:0}
+    .hero{background:var(--nav);color:var(--nav-ink);position:relative;overflow:hidden;padding:58px clamp(24px,6vw,84px) 48px}
+    .hero:after{content:"";position:absolute;width:410px;height:410px;border:1px solid rgba(112,203,193,.15);border-radius:50%;right:-130px;top:-220px;box-shadow:0 0 0 46px rgba(112,203,193,.03),0 0 0 92px rgba(112,203,193,.025)}
+    .eyebrow{font:500 11px/1 "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.14em;color:#83c8c0;margin:0 0 18px}
+    h1{font-size:clamp(38px,6vw,74px);letter-spacing:-.052em;line-height:.97;max-width:900px;margin:0 0 22px;font-weight:700}
+    .lede{font-size:clamp(17px,2vw,21px);max-width:790px;color:#bed4d2;margin:0 0 34px;line-height:1.55}
+    .hero-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.16);max-width:940px}
+    .metric{background:var(--nav);padding:16px 18px;min-height:88px}
+    .metric b{display:block;font-size:24px;color:#fff;line-height:1.2}.metric span{font:400 11px/1.4 "IBM Plex Mono";color:#87aaa7}
+    .content{max-width:1280px;padding:42px clamp(22px,5vw,72px) 80px;margin:auto}
+    section{margin:0 0 70px}
+    .section-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,410px);gap:30px;align-items:end;margin-bottom:22px}
+    .section-num{font:500 11px/1 "IBM Plex Mono";color:var(--accent-2);letter-spacing:.12em;margin-bottom:10px}
+    h2{font-size:clamp(28px,4vw,44px);letter-spacing:-.038em;line-height:1.06;margin:0;max-width:760px}
+    .section-head p{margin:0;color:var(--muted);font-size:15px}
+    .callout{display:grid;grid-template-columns:auto 1fr;gap:14px;background:var(--soft);border:1px solid var(--line);padding:18px 20px;margin:22px 0;border-radius:10px}
+    .callout strong{font:500 11px/1.4 "IBM Plex Mono";color:var(--accent);text-transform:uppercase;letter-spacing:.08em}.callout p{margin:0;font-size:14px;color:var(--ink)}
+    .rank-wrap{overflow:hidden;border:1px solid var(--line);background:var(--paper);box-shadow:var(--shadow)}
+    table{width:100%;border-collapse:collapse}
+    th{font:500 10px/1.2 "IBM Plex Mono";letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:13px 14px;background:var(--soft);border-bottom:1px solid var(--line)}
+    td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:top;font-size:13px}
+    tr:last-child td{border-bottom:0}.rank{font-family:"IBM Plex Mono";color:var(--muted);width:42px}.source-name{font-weight:650;font-size:14px}.best{color:var(--muted)}
+    .tag{display:inline-block;font:500 10px/1.2 "IBM Plex Mono";padding:4px 7px;border-radius:4px;background:var(--soft);color:var(--accent);white-space:nowrap}.tag.restricted{color:var(--fire)}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+    .filter{border:1px solid var(--line);background:var(--paper);color:var(--muted);padding:8px 12px;border-radius:999px;cursor:pointer;font-size:13px}.filter:hover,.filter.active{background:var(--accent);border-color:var(--accent);color:white}
+    .source-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    details.source{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;align-self:start}
+    details.source[open]{box-shadow:var(--shadow)}
+    details.source summary{list-style:none;cursor:pointer;padding:18px 20px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+    details.source summary::-webkit-details-marker{display:none}
+    .source-title{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}.source-title h3{font-size:19px;line-height:1.2;margin:0}.operator{font:400 11px/1.4 "IBM Plex Mono";color:var(--muted)}
+    .summary-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}
+    .toggle{width:28px;height:28px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;color:var(--accent);font-size:18px;line-height:1}
+    details[open] .toggle{transform:rotate(45deg)}
+    .source-body{padding:0 20px 22px;border-top:1px solid var(--line)}
+    .facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px;margin-top:9px}
+    .fact{padding:13px 0;border-bottom:1px solid var(--line)}.fact.wide{grid-column:1/-1}
+    .fact dt{font:500 10px/1.2 "IBM Plex Mono";text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:5px}.fact dd{margin:0;font-size:13px;line-height:1.55}
+    code{font-family:"IBM Plex Mono",monospace;font-size:.9em;background:var(--soft);padding:2px 5px;border-radius:3px;overflow-wrap:anywhere}
+    .ref{font:500 9px/1 "IBM Plex Mono";vertical-align:super;text-decoration:none;margin-left:2px}
+    .commercial{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+    .commercial-card{background:var(--paper);border:1px solid var(--line);padding:20px;border-radius:12px}
+    .commercial-card h3{font-size:19px;margin:0 0 4px}.commercial-card .spec{font:500 12px/1.4 "IBM Plex Mono";color:var(--accent-2);margin-bottom:12px}.commercial-card p{font-size:13px;color:var(--muted);margin:7px 0}.commercial-card b{color:var(--ink)}
+    .decision-tabs{display:flex;gap:2px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:0}
+    .decision-tabs button{border:0;background:transparent;color:var(--muted);padding:12px 14px;cursor:pointer;border-bottom:3px solid transparent}.decision-tabs button.active{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+    .decision-panel{display:none;background:var(--paper);border:1px solid var(--line);border-top:0;padding:24px}.decision-panel.active{display:block}
+    .decision-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+    .step{background:var(--paper);padding:18px}.step .n{font:500 10px/1 "IBM Plex Mono";color:var(--accent-2)}.step h4{margin:8px 0 6px;font-size:16px}.step p{margin:0;font-size:13px;color:var(--muted)}
+    .pipeline{counter-reset:pipe;display:grid;gap:0;margin-top:22px;border-left:2px solid var(--line)}
+    .pipe{position:relative;padding:0 0 24px 28px}.pipe:last-child{padding-bottom:0}.pipe:before{counter-increment:pipe;content:counter(pipe);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:#fff;font:500 11px/1 "IBM Plex Mono"}.pipe h3{margin:2px 0 6px;font-size:17px}.pipe p{margin:0;color:var(--muted);font-size:13px}
+    .endpoint-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .endpoint{background:var(--code);color:#dceae8;padding:16px;border-radius:8px;min-width:0}.endpoint b{display:block;color:#fff;font-size:13px;margin-bottom:7px}.endpoint code{background:transparent;padding:0;color:#8fd3ca;display:block;font-size:11px;word-break:break-all}.endpoint span{display:block;color:#83a3a3;font-size:11px;margin-top:8px}
+    .source-list{columns:2;column-gap:30px;padding:0;list-style:none}.source-list li{break-inside:avoid;border-bottom:1px solid var(--line);padding:10px 0;font-size:12px}.source-list a{font-family:"IBM Plex Mono",monospace;font-size:11px;word-break:break-all}
+    .limits{background:var(--paper);border:1px solid var(--line);padding:20px;border-radius:10px}.limits h3{margin:0 0 10px;font-size:17px}.limits ul{margin:0;padding-left:20px;color:var(--muted);font-size:13px}.limits li+li{margin-top:8px}
+    footer{padding:22px clamp(22px,5vw,72px) 40px;color:var(--muted);font-size:11px;border-top:1px solid var(--line)}
+    .mobile-nav{display:none}
+    .hide{display:none!important}
+    @media(max-width:900px){
+      .shell{display:block}.rail{display:none}.mobile-nav{display:flex;position:sticky;top:0;z-index:20;background:var(--nav);padding:10px 14px;gap:8px;overflow:auto;border-bottom:1px solid rgba(255,255,255,.12)}.mobile-nav a{color:#c9dcda;text-decoration:none;font-size:12px;white-space:nowrap;padding:7px 9px}.hero{padding-top:42px}.hero-grid{grid-template-columns:repeat(2,1fr)}.section-head{grid-template-columns:1fr}.source-grid,.commercial{grid-template-columns:1fr}.decision-flow{grid-template-columns:1fr}.endpoint-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:650px){
+      h1{font-size:42px}.content{padding-top:30px}section{margin-bottom:52px}.rank-wrap{border:0;background:transparent;box-shadow:none}table,thead,tbody,tr,th,td{display:block}thead{display:none}tr{background:var(--paper);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;padding:14px}td{border:0;padding:3px 0 3px 104px;position:relative;font-size:13px}td:before{content:attr(data-label);position:absolute;left:0;width:94px;font:500 9px/1.5 "IBM Plex Mono";text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}td.rank{display:inline-block;width:auto;padding:3px 7px;background:var(--accent);color:#fff;border-radius:4px;margin-bottom:7px}.rank:before{display:none}.facts{grid-template-columns:1fr}.fact.wide{grid-column:auto}.source-list{columns:1}.callout{grid-template-columns:1fr}.hero-grid{grid-template-columns:1fr 1fr}.metric{padding:13px}.metric b{font-size:20px}
+    }
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.toggle{transition:none}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail">
+    <div class="rail-mark"><div class="orb" aria-hidden="true"></div><div><strong>Earthwatch<br>source atlas</strong><span>Research snapshot · 25 Sep 2026</span></div></div>
+    <p class="nav-label">Contents</p>
+    <nav aria-label="Page sections">
+      <a href="#overview"><i></i>Field overview</a>
+      <a href="#ranking"><i></i>Free-source ranking</a>
+      <a href="#catalog"><i></i>Source dossiers</a>
+      <a href="#commercial"><i></i>Commercial tier</a>
+      <a href="#selection"><i></i>Best-data logic</a>
+      <a href="#pipeline"><i></i>Python ingestion</a>
+      <a href="#references"><i></i>Sources & limits</a>
+    </nav>
+    <div class="rail-note">A build-time research reference, not a live catalog. Availability, quotas and commercial quotes must be rechecked before procurement.</div>
+  </aside>
+  <main>
+    <nav class="mobile-nav" aria-label="Mobile page sections">
+      <a href="#ranking">Ranking</a><a href="#catalog">Sources</a><a href="#commercial">Commercial</a><a href="#selection">Selection</a><a href="#pipeline">Pipeline</a>
+    </nav>
+    <header class="hero" id="overview">
+      <p class="eyebrow">Earth observation ingestion field guide · research dated 25 Sep 2026</p>
+      <h1>Choose the right eye in orbit.</h1>
+      <p class="lede">A practical catalog of free and commercial imagery for Earthwatch: ground resolution, cadence, bands, access paths, licensing, and the ingestion decisions that matter in production.</p>
+      <div class="hero-grid" aria-label="Research summary">
+        <div class="metric"><b>14</b><span>ranked free sources and product families</span></div>
+        <div class="metric"><b>0.6 m</b><span>finest free GSD · NAIP, CONUS aerial</span></div>
+        <div class="metric"><b>2–3 d</b><span>dense harmonized cadence · HLS</span></div>
+        <div class="metric"><b>30 cm</b><span>commercial optical class · quote-based</span></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <section id="ranking">
+        <div class="section-head"><div><div class="section-num">01 / FREE DATA</div><h2>Ranked by operational value</h2></div><p>Resolution × revisit is the primary ranking signal; “best use” breaks the tie. A lower rank can still be the right answer when spectral or temporal needs dominate.</p></div>
+        <div class="callout"><strong>Default stack</strong><p>Start with Element84 Earth Search or Microsoft Planetary Computer for COG-backed Sentinel-2, Landsat, HLS, Sentinel-1, MODIS, GOES, Copernicus DEM and NAIP. Discovery is open; some pixel reads need a free account or cloud credentials.<a class="ref" href="#ref-1">[1]</a><a class="ref" href="#ref-2">[2]</a></p></div>
+        <div class="rank-wrap"><table>
+          <thead><tr><th>Rank</th><th>Source</th><th>Finest GSD</th><th>Typical revisit</th><th>Where it wins</th></tr></thead>
+          <tbody>
+            <tr><td class="rank" data-label="Rank">01</td><td class="source-name" data-label="Source">Sentinel-2 MSI</td><td data-label="Finest GSD">10 m</td><td data-label="Revisit">~5 days*</td><td class="best" data-label="Best use">Red-edge vegetation, water/coast and burn severity</td></tr>
+            <tr><td class="rank" data-label="Rank">02</td><td class="source-name" data-label="Source">HLS v2.0 · L30 + S30</td><td data-label="Finest GSD">30 m</td><td data-label="Revisit">2–3 days</td><td class="best" data-label="Best use">Dense, harmonized time series; change and phenology features</td></tr>
+            <tr><td class="rank" data-label="Rank">03</td><td class="source-name" data-label="Source">Planet NICFI <span class="tag restricted">restricted</span></td><td data-label="Finest GSD">~3.7 m</td><td data-label="Revisit">Monthly, tropics</td><td class="best" data-label="Best use">Tropical forest monitoring; non-commercial, uncertain continuity</td></tr>
+            <tr><td class="rank" data-label="Rank">04</td><td class="source-name" data-label="Source">Sentinel-1 SAR</td><td data-label="Finest GSD">10 m spacing</td><td data-label="Revisit">~6-day design</td><td class="best" data-label="Best use">All-weather flood, moisture proxy, cloudy burn and InSAR</td></tr>
+            <tr><td class="rank" data-label="Rank">05</td><td class="source-name" data-label="Source">Landsat 8/9 OLI + TIRS</td><td data-label="Finest GSD">15 m pan</td><td data-label="Revisit">8 d combined</td><td class="best" data-label="Best use">Thermal detail and the 40+ year land archive</td></tr>
+            <tr><td class="rank" data-label="Rank">06</td><td class="source-name" data-label="Source">NAIP aerial</td><td data-label="Finest GSD">0.6 m</td><td data-label="Revisit">≥ every 3 yr</td><td class="best" data-label="Best use">Free VHR baseline and label generation in CONUS</td></tr>
+            <tr><td class="rank" data-label="Rank">07</td><td class="source-name" data-label="Source">VIIRS</td><td data-label="Finest GSD">375 m</td><td data-label="Revisit">Daily</td><td class="best" data-label="Best use">Global rapid monitoring, active fire and night lights</td></tr>
+            <tr><td class="rank" data-label="Rank">08</td><td class="source-name" data-label="Source">MODIS</td><td data-label="Finest GSD">250 m</td><td data-label="Revisit">1–2 days</td><td class="best" data-label="Best use">Vegetation and thermal baselines from 2000 onward</td></tr>
+            <tr><td class="rank" data-label="Rank">09</td><td class="source-name" data-label="Source">Sentinel-3 OLCI / SLSTR</td><td data-label="Finest GSD">300 / 500 m</td><td data-label="Revisit">~2–4 d / ~daily</td><td class="best" data-label="Best use">Ocean color, land/water temperature and burned area</td></tr>
+            <tr><td class="rank" data-label="Rank">10</td><td class="source-name" data-label="Source">GOES ABI</td><td data-label="Finest GSD">0.5 km</td><td data-label="Revisit">10 min full disk</td><td class="best" data-label="Best use">Minute-scale fire and weather in the Western Hemisphere</td></tr>
+            <tr><td class="rank" data-label="Rank">11</td><td class="source-name" data-label="Source">ASTER VNIR</td><td data-label="Finest GSD">15 m</td><td data-label="Revisit">Tasked archive</td><td class="best" data-label="Best use">Fine geology/mineral mapping; only VNIR remains active</td></tr>
+            <tr><td class="rank" data-label="Rank">12</td><td class="source-name" data-label="Source">EO-1 Hyperion archive</td><td data-label="Finest GSD">30 m</td><td data-label="Revisit">Archive 2001–2017</td><td class="best" data-label="Best use">Free 242-band hyperspectral method prototyping</td></tr>
+            <tr><td class="rank" data-label="Rank">13</td><td class="source-name" data-label="Source">PRISMA / EnMAP / EMIT</td><td data-label="Finest GSD">30 / 30 / 60 m</td><td data-label="Revisit">Tasked / on-demand</td><td class="best" data-label="Best use">Species, chemistry and mineralogy R&amp;D</td></tr>
+            <tr><td class="rank" data-label="Rank">14</td><td class="source-name" data-label="Source">Copernicus DEM GLO-30</td><td data-label="Finest GSD">30 m</td><td data-label="Revisit">Static</td><td class="best" data-label="Best use">Global baseline DSM; pair with lidar footprints for truth</td></tr>
+          </tbody>
+        </table></div>
+        <p style="font-size:11px;color:var(--muted);margin-top:10px">* Sentinel-2’s ~5-day figure is the two-satellite design reference; Sentinel-2C is now operational, but a new global effective revisit was not verified in this research.</p>
+      </section>
+
+      <section id="catalog">
+        <div class="section-head"><div><div class="section-num">02 / SOURCE DOSSIERS</div><h2>What the pixels actually contain</h2></div><p>Open a dossier for band geometry, cadence, programmatic access, license posture and the ingestion trap most likely to bite.</p></div>
+        <div class="toolbar" role="group" aria-label="Filter source dossiers">
+          <button class="filter active" data-filter="all">All sources</button><button class="filter" data-filter="optical">Optical</button><button class="filter" data-filter="sar">SAR</button><button class="filter" data-filter="thermal">Thermal</button><button class="filter" data-filter="elevation">Elevation</button>
+        </div>
+        <div class="source-grid">
+
+          <details class="source" data-kinds="optical" open><summary><div><div class="source-title"><h3>Sentinel-2 MSI</h3><span class="operator">ESA / Copernicus</span></div><div class="summary-meta"><span class="tag">10 m</span><span class="tag">~5 d</span><span class="tag">commercial use</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>Constellation</dt><dd>S-2A (2015), S-2B (2017), S-2C (2024). Land and coastal coverage from 84°N to 84°S.<a class="ref" href="#ref-3">[3]</a></dd></div>
+            <div class="fact"><dt>GSD</dt><dd>10 m: B2/B3/B4/B8. 20 m: B5/B6/B7/B8A/B11/B12. 60 m: B1/B9. B10 appears in L1C only.</dd></div>
+            <div class="fact wide"><dt>Spectral bands · center wavelength µm</dt><dd>B1 coastal 0.443; B2 blue 0.49; B3 green 0.56; B4 red 0.665; B5/B6/B7 red-edge 0.704/0.740/0.783; B8 NIR 0.842; B8A narrow NIR 0.865; B9 water vapor 0.945; B10 cirrus 1.3735; B11/B12 SWIR 1.61/2.19.</dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>Earth Search: <code>sentinel-2-c1-l2a</code>, <code>sentinel-2-pre-c1-l2a</code>, <code>sentinel-2-l2a</code>, <code>sentinel-2-l1c</code>. MPC: <code>sentinel-2-l2a</code>. CDSE: <code>sentinel-2-l2a</code>. Discovery is open; CDSE reads need a free account. No verified hard rate limit; fair-use throttling applies.<a class="ref" href="#ref-1">[1]</a><a class="ref" href="#ref-2">[2]</a><a class="ref" href="#ref-4">[4]</a></dd></div>
+            <div class="fact"><dt>License</dt><dd>Copernicus open terms: free worldwide use, including commercial, with attribution.</dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd><b>Critical:</b> Collection 1 L2A reflectance uses scale <code>0.0001</code> and offset <code>−0.1</code>; legacy products use offset 0. Read <code>raster:bands</code>. Earth Search keys are semantic lowercase; MPC keys are uppercase band IDs. CDSE serves original JP2s, not COGs.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="optical thermal"><summary><div><div class="source-title"><h3>Landsat Collection 2</h3><span class="operator">NASA / USGS</span></div><div class="summary-meta"><span class="tag">15–100 m</span><span class="tag">8 d combined</span><span class="tag">public domain</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>Constellation</dt><dd>Landsat 8 (2013) and 9 (2021), with Collection 2 L2 heritage from Landsat 4/5/7 back to 22 Aug 1982.</dd></div>
+            <div class="fact"><dt>GSD & cadence</dt><dd>30 m multispectral; 15 m panchromatic; TIRS native 100 m resampled to 30 m. Each satellite repeats in 16 days; combined cadence is 8 days.</dd></div>
+            <div class="fact wide"><dt>OLI / TIRS bands · center wavelength µm</dt><dd>B1 coastal 0.44; B2 blue 0.48; B3 green 0.56; B4 red 0.65; B5 NIR 0.87; B6/B7 SWIR 1.61/2.20; pan 0.50–0.68; B9 cirrus 1.37; B10/B11 thermal 10.9/12.0.</dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>Earth Search and MPC: <code>landsat-c2-l2</code>. USGS STAC: <code>landsat-c2l2-sr</code>, <code>-st</code>, <code>landsat-c2ard-*</code>, <code>landsat-c2l1</code>, and L3 <code>-ba</code>, <code>-fsca</code>, <code>-dswe</code>. Use <code>/stac-server</code>; bare <code>/stac</code> returns 403.<a class="ref" href="#ref-5">[5]</a></dd></div>
+            <div class="fact"><dt>License</dt><dd>US federal data; public domain.</dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd>Surface reflectance: scale <code>0.0000275</code>, offset <code>−0.2</code>. Surface temperature: scale <code>0.00341802</code>, offset <code>+149 K</code>. Decode <code>qa_pixel</code> bits for cloud, shadow, snow and water. Catalog asset keys differ.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="optical"><summary><div><div class="source-title"><h3>HLS v2.0</h3><span class="operator">NASA IMPACT / LP DAAC</span></div><div class="summary-meta"><span class="tag">30 m</span><span class="tag">2–3 d</span><span class="tag">public domain</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>Virtual constellation</dt><dd>Landsat 8/9 OLI plus Sentinel-2A/B/C MSI, harmonized to a common MGRS grid. Near-global land except Antarctica.<a class="ref" href="#ref-6">[6]</a></dd></div>
+            <div class="fact"><dt>GSD & cadence</dt><dd>30 m; global land every 2–3 days; reported latency about 1.7 days.</dd></div>
+            <div class="fact wide"><dt>Bands</dt><dd>S30 carries 13 Sentinel-derived bands B01–B12 plus B8A, spanning about 0.4439–2.22024 µm, with solar/view angles and Fmask. L30 carries seven OLI bands.</dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>MPC collections <code>hls2-l30</code> and <code>hls2-s30</code>; CMR concepts <code>HLSL30.002</code> and <code>HLSS30.002</code>; LP DAAC direct. MPC also publishes GeoParquet item snapshots.</dd></div>
+            <div class="fact"><dt>License</dt><dd>NASA open data; commercial use allowed.</dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd>The default dense time-series cube: common grid and tiling eliminate much harmonization work. Reflectance scale is <code>0.0001</code>; Fmask is bit-packed. S30 includes Sentinel-2C.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="sar"><summary><div><div class="source-title"><h3>Sentinel-1 SAR</h3><span class="operator">ESA / Copernicus</span></div><div class="summary-meta"><span class="tag">10 m spacing</span><span class="tag">~6 d design</span><span class="tag">all weather</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>Constellation</dt><dd>C-band SAR. S-1A and S-1C operational in the research snapshot; S-1B failed in 2021. S-1D launched Nov 2025, but commissioning status remained unverified.</dd></div>
+            <div class="fact"><dt>Geometry & bands</dt><dd>IW SLC about 5×20 m; GRD typically 10 m pixel spacing with about 20×22 m resolution. C-band 5.405 GHz; VV+VH over land, HH+HV in polar/maritime acquisitions.</dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>Earth Search <code>sentinel-1-grd</code>: open search, but requester-pays pixels require AWS credentials. MPC <code>sentinel-1-grd</code> and <code>sentinel-1-rtc</code>; RTC requires free PC account SAS signing. CDSE <code>sentinel-1-grd</code> requires account S3 credentials.<a class="ref" href="#ref-1">[1]</a><a class="ref" href="#ref-2">[2]</a><a class="ref" href="#ref-4">[4]</a></dd></div>
+            <div class="fact"><dt>License</dt><dd>Copernicus open terms allow commercial use. MPC’s RTC derivative is CC BY 4.0.</dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd>Prefer terrain-corrected gamma-nought RTC for mapping; it is map-projected float32 with nodata <code>−32768</code>. Use SLC from CDSE or ASF when phase matters for InSAR. Requester-pays GRD on Earth Search can create unexpected cloud charges.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="optical thermal"><summary><div><div class="source-title"><h3>MODIS · Terra / Aqua</h3><span class="operator">NASA</span></div><div class="summary-meta"><span class="tag">250 m–1 km</span><span class="tag">1–2 d</span><span class="tag">public domain</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>GSD & cadence</dt><dd>250 m B1–2; 500 m B3–7; 1 km B8–36. Global coverage every 1–2 days.<a class="ref" href="#ref-7">[7]</a></dd></div>
+            <div class="fact"><dt>Spectrum</dt><dd>36 bands from 0.405 to 14.385 µm: VIS/NIR B1–19, SWIR/MWIR B20–25, LWIR B27–36.</dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>MPC includes Collection 6.1 products such as <code>modis-13Q1-061</code> with COGs and source HDF. CMR STAC / LAADS DAAC covers the broader suite. MPC reads require no key; Earthdata token is needed for CMR downloads.</dd></div>
+            <div class="fact"><dt>License</dt><dd>Public domain.</dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd>Use daily LST (<code>MOD11A1</code>) and 16-day vegetation index (<code>MOD13Q1</code>; NDVI/EVI scale <code>0.0001</code>) for long baselines. Terra/Aqua are aging; prefer VIIRS for continuity.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="optical thermal"><summary><div><div class="source-title"><h3>VIIRS</h3><span class="operator">NASA / NOAA</span></div><div class="summary-meta"><span class="tag">375 / 750 m</span><span class="tag">daily</span><span class="tag">public domain</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>Constellation</dt><dd>Suomi-NPP (2011), NOAA-20 (2017), NOAA-21 (2022); daily global coverage across a 3,040 km swath.</dd></div>
+            <div class="fact"><dt>GSD & spectrum</dt><dd>375 m for five I-bands; 750 m for 16 M-bands and the Day/Night Band. VIS/NIR, SWIR, MWIR around 3.7 µm, LWIR around 8.5–12 µm; DNB spans 0.5–0.9 µm.</dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>CMR STAC / LANCE (for example, near-real-time <code>VNP02IMG</code>) and NOAA CLASS. Earthdata token is required for CMR downloads.<a class="ref" href="#ref-8">[8]</a></dd></div>
+            <div class="fact"><dt>License</dt><dd>Public domain.</dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd>I-bands are the sharpest free daily global optical view in this catalog. The DNB supports night-light analysis; <code>VNP14</code> is the standard rapid active-fire product.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="optical thermal"><summary><div><div class="source-title"><h3>Sentinel-3 OLCI / SLSTR</h3><span class="operator">ESA / EU / EUMETSAT</span></div><div class="summary-meta"><span class="tag">300 m–1 km</span><span class="tag">~daily–4 d</span><span class="tag">commercial use</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>GSD & cadence</dt><dd>OLCI 300 m with ~2–4-day global coverage. SLSTR 500 m solar and 1 km thermal, about daily to two-day coverage.</dd></div>
+            <div class="fact"><dt>Spectrum</dt><dd>OLCI: 21 bands from 400–1020 nm. SLSTR: solar channels at 0.55/0.65/0.87/1.375/1.61/2.25 µm and thermal channels at 3.7/10.85/12 µm.<a class="ref" href="#ref-9">[9]</a></dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>CDSE STAC <code>sentinel-3-*</code> families; free account for reads. EUMETSAT Data Store API uses a free account and API key.</dd></div>
+            <div class="fact"><dt>License</dt><dd>Copernicus open terms; commercial use allowed.</dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd>Use for daily ocean color and land/water temperature. Nadir plus oblique SLSTR views complicate raw stacking; prefer L2 composites. OLCI + SLSTR also feed the daily 300 m CLMS Burnt Area products.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="optical thermal"><summary><div><div class="source-title"><h3>GOES-R ABI</h3><span class="operator">NOAA / NASA</span></div><div class="summary-meta"><span class="tag">0.5–2 km</span><span class="tag">30 sec–10 min</span><span class="tag">public domain</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>Cadence & coverage</dt><dd>Mode 6: full disk every 10 minutes, CONUS/PACUS every 5 minutes, mesoscale every 30–60 seconds. Western Hemisphere only.</dd></div>
+            <div class="fact"><dt>GSD & bands</dt><dd>0.5 km red B2; 1 km B1/B3/B5; 2 km B4 and B6–B16. 16 channels at 0.47, 0.64, 0.87, 1.38, 1.61, 2.25, 3.89, 6.17, 6.93, 7.34, 8.44, 9.61, 10.33, 11.19, 12.27 and 13.27 µm.<a class="ref" href="#ref-10">[10]</a></dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>MPC <code>goes-cmi</code> publishes L2 CMIP/MCMIP as NetCDF and COGs, including Web Mercator. AWS Open Data <code>noaa-goes</code> is public with no key.<a class="ref" href="#ref-11">[11]</a></dd></div>
+            <div class="fact"><dt>License</dt><dd>Public domain.</dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd>GOES uses a geostationary fixed grid, not a normal projected raster. Reproject explicitly before stacking with LEO imagery; use <code>_wm</code> COG assets for quick overlays.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="optical thermal"><summary><div><div class="source-title"><h3>ASTER archive</h3><span class="operator">NASA / METI</span></div><div class="summary-meta"><span class="tag">15 / 30 / 90 m</span><span class="tag">tasked</span><span class="tag">public domain</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>Instrument</dt><dd>Terra-based, 60 km swath. VNIR: 15 m B1–3 including a backward-looking stereo channel. SWIR: 30 m B4–9. TIR: 90 m B10–14.</dd></div>
+            <div class="fact"><dt>Spectrum</dt><dd>VNIR 0.52–0.86 µm; SWIR six bands 1.60–2.43 µm; TIR five bands 8.125–11.65 µm.</dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>CMR STAC / LP DAAC, including <code>AST_L1T</code>; Earthdata login required for download.<a class="ref" href="#ref-12">[12]</a></dd></div>
+            <div class="fact"><dt>License</dt><dd>Public domain through US distribution.</dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd><b>Only VNIR remains active.</b> SWIR failed 12 Jan 2009 after anomalies from Apr 2008. TIR was permanently shut down 16 Jan 2026. Version 4 archive reprocessing began in 2025.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="optical"><summary><div><div class="source-title"><h3>NAIP aerial</h3><span class="operator">USDA FSA</span></div><div class="summary-meta"><span class="tag">0.6 m</span><span class="tag">≥ 3 yr</span><span class="tag">public domain</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>Coverage</dt><dd>CONUS aerial surveys; 2010–present in the COG archive. Each state is flown at least every three years.</dd></div>
+            <div class="fact"><dt>GSD & bands</dt><dd>Mostly 0.6 m, with some 1 m imagery; 8-bit red, green, blue and NIR.</dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>Earth Search <code>naip</code>, MPC <code>naip</code>, and the AWS Open Data NAIP bucket. No authentication.</dd></div>
+            <div class="fact"><dt>License</dt><dd>Public domain.<a class="ref" href="#ref-13">[13]</a></dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd>It is aerial, not satellite, and acquisition season / leaf-on conditions vary by state and year. Still the strongest free VHR label and validation source for US projects.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="optical"><summary><div><div class="source-title"><h3>Hyperspectral trio</h3><span class="operator">ASI / DLR / NASA JPL</span></div><div class="summary-meta"><span class="tag">30–60 m</span><span class="tag">224–285 bands</span><span class="tag">terms vary</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>PRISMA</dt><dd>ASI; 30 m hyperspectral plus 5 m pan, 30 km swath; 239 bands from 400–2500 nm; ~29-day relook with ±70° pointing.</dd></div>
+            <div class="fact"><dt>EnMAP / EMIT</dt><dd>EnMAP: DLR/GFZ, 30 m, 30 km swath, ~224–228 bands from 420–2450 nm. EMIT: NASA JPL on ISS, ~60 m, 75 km swath, ~285 bands from 380–2500 nm.</dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>PRISMA through ASI portal; EnMAP via DLR EOC GeoService/STAC; EMIT via CMR/LP DAAC. Free registration is typically required.</dd></div>
+            <div class="fact"><dt>License</dt><dd>EMIT NASA data are public domain. PRISMA and EnMAP have mission-specific terms; verify commercial permission.</dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd>Use L2D bottom-of-atmosphere products and remove atmospheric-absorption/noise bands. Small, tasked scenes make these spectral R&amp;D sources—not wall-to-wall monitoring feeds.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="elevation"><summary><div><div class="source-title"><h3>GEDI lidar</h3><span class="operator">NASA / University of Maryland</span></div><div class="summary-meta"><span class="tag">25 m footprints</span><span class="tag">sparse tracks</span><span class="tag">public domain</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>Geometry</dt><dd>ISS-mounted 1064 nm full-waveform lidar. 25 m footprints at 60 m along-track spacing, eight beams, between ±51.6° latitude.</dd></div>
+            <div class="fact"><dt>Coverage</dt><dd>Discrete tracks, not a raster. GEDI hibernated 17 Mar 2023–24 Apr 2024 and resumed 26 Apr 2024.</dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>CMR STAC / LP DAAC, for example <code>GEDI02_A</code>; Earthdata login required.<a class="ref" href="#ref-14">[14]</a></dd></div>
+            <div class="fact"><dt>License</dt><dd>Public domain.</dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd>Join footprint measurements to optical pixels for canopy-height and biomass training or validation. Do not present interpolated footprints as wall-to-wall observed elevation.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="elevation"><summary><div><div class="source-title"><h3>ICESat-2 ATLAS</h3><span class="operator">NASA</span></div><div class="summary-meta"><span class="tag">~17 m footprints</span><span class="tag">91 d repeat</span><span class="tag">public domain</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>Geometry</dt><dd>532 nm photon-counting lidar; six beams; ~17 m footprints with ~0.7 m photon sampling along track.</dd></div>
+            <div class="fact"><dt>Coverage</dt><dd>Global discrete tracks to ±88° latitude; 91-day repeat.</dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>CMR STAC / NSIDC collections <code>ATL03</code>, <code>ATL06</code> and <code>ATL08</code>; Earthdata login required.</dd></div>
+            <div class="fact"><dt>License</dt><dd>Public domain.</dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd>Strong free vertical truth for ice and canopy change. <code>ATL08</code> is the most pipeline-friendly land/vegetation product.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="elevation"><summary><div><div class="source-title"><h3>Copernicus DEM</h3><span class="operator">ESA · TanDEM-X / WorldDEM source</span></div><div class="summary-meta"><span class="tag">30 / 90 m</span><span class="tag">static DSM</span><span class="tag">custom license</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>Products</dt><dd><code>GLO-30</code> at ~30 m and <code>GLO-90</code> at ~90 m; float32 elevation in metres. Near-global, though GLO-30 excludes a small subset of country tiles.</dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>Earth Search and MPC: <code>cop-dem-glo-30</code>, <code>cop-dem-glo-90</code>. These mirrors avoid requester-pays; the AWS Open Data source bucket is requester-pays.</dd></div>
+            <div class="fact"><dt>License</dt><dd>Custom ESA terms, not public domain or CC0. Commercial use is possible with attribution and additional conditions; review the annex for the intended product.</dd></div>
+            <div class="fact"><dt>Coverage</dt><dd>Static global baseline; no revisit.</dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd>This is a <b>DSM</b>, so buildings and vegetation are part of the surface. Normalize against GEDI/ICESat-2 or a terrain model such as FABDEM for bare-earth analysis.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="elevation"><summary><div><div class="source-title"><h3>SRTM / NASADEM</h3><span class="operator">NASA / USGS</span></div><div class="summary-meta"><span class="tag">~30 m</span><span class="tag">static</span><span class="tag">public domain</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>Coverage</dt><dd>Shuttle Radar Topography Mission baseline from 2000, about 60°N–56°S. NASADEM is the reprocessed, void-filled derivative.</dd></div>
+            <div class="fact"><dt>GSD</dt><dd>One arc-second, approximately 30 m; single elevation band.</dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>MPC <code>nasadem</code>, NASA Earthdata and AWS Open Data. MPC requires no authentication for reads.</dd></div>
+            <div class="fact"><dt>License</dt><dd>Public domain.</dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd>Copernicus GLO-30 is generally the better global baseline. Retain SRTM/NASADEM when reproducing or extending legacy studies.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="optical"><summary><div><div class="source-title"><h3>EO-1 Hyperion / ALI</h3><span class="operator">NASA / USGS archive</span></div><div class="summary-meta"><span class="tag">30 m</span><span class="tag">2001–2017</span><span class="tag">public domain</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>Archive</dt><dd>Hyperion hyperspectral and ALI multispectral imagery acquired from 2001–2017. Hyperion provides 242 bands at 30 m.</dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>USGS STAC collections <code>eo-1-hyperion-l1t</code>, <code>eo-1-hyperion-l1gst</code>, <code>eo-1-ali-l1t</code> and <code>eo-1-ali-l1gst</code>.</dd></div>
+            <div class="fact"><dt>License</dt><dd>Public domain.</dd></div>
+            <div class="fact"><dt>Cadence</dt><dd>Archive only; no current revisit.</dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd>A useful spectral “time machine” for prototyping methods on historical scenes, not an operational monitoring source.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="optical"><summary><div><div class="source-title"><h3>Planet NICFI mosaics</h3><span class="operator">Planet / Norway NICFI</span></div><div class="summary-meta"><span class="tag restricted">non-commercial</span><span class="tag">~3.7 m</span><span class="tag">uncertain status</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>Coverage & cadence</dt><dd>Monthly PlanetScope tropical-forest mosaics, approximately 3–3.7 m, RGB + NIR; newer SuperDove imagery may carry eight bands.</dd></div>
+            <div class="fact"><dt>Programmatic access</dt><dd>Planet Basemaps / Data API with an approved free NICFI account.</dd></div>
+            <div class="fact"><dt>License</dt><dd><b>Non-commercial only</b>, limited to NICFI forest/climate purposes. It cannot be a dependency of a commercial Earthwatch product.</dd></div>
+            <div class="fact"><dt>Status</dt><dd>The original contract ended 23 Jan 2025; only a temporary Level-1 extension followed. Norway cancelled the follow-on procurement on 9 Sep 2025 after a legal challenge.<a class="ref" href="#ref-15">[15]</a><a class="ref" href="#ref-16">[16]</a></dd></div>
+            <div class="fact wide"><dt>Ingestion note</dt><dd>Treat availability as temporary and recheck before every new project. Excellent spatial/cadence pairing for tropical forests, but unsuitable for the commercial stack.</dd></div>
+          </dl></div></details>
+
+          <details class="source" data-kinds="optical sar"><summary><div><div class="source-title"><h3>Ready-made L3 products</h3><span class="operator">USGS / Copernicus</span></div><div class="summary-meta"><span class="tag">water</span><span class="tag">burn</span><span class="tag">snow</span></div></div><span class="toggle">+</span></summary><div class="source-body"><dl class="facts">
+            <div class="fact"><dt>Landsat C2 L3</dt><dd>USGS STAC: <code>landsat-c2l3-ba</code> for burn classification/probability, <code>landsat-c2l3-dswe</code> for six-raster dynamic surface water extent, and <code>landsat-c2l3-fsca</code> for fractional snow.</dd></div>
+            <div class="fact"><dt>CLMS Burnt Area</dt><dd>CDSE: <code>clms_ba_global_300m_daily_v4_cog</code> from 2025 onward; <code>_v3_cog</code> for 2023–2025. Daily 300 m day-of-burn, burned fraction and probability from Sentinel-3.</dd></div>
+            <div class="fact"><dt>License</dt><dd>Landsat products are public domain. CLMS products use Copernicus open terms.</dd></div>
+            <div class="fact"><dt>Why ingest them</dt><dd>Use a validated L3 product when its classification definition matches the project; keep upstream imagery for auditing and custom thresholds.</dd></div>
+          </dl></div></details>
+        </div>
+      </section>
+
+      <section id="commercial">
+        <div class="section-head"><div><div class="section-num">03 / COMMERCIAL HIGH RESOLUTION</div><h2>When free pixels stop being enough</h2></div><p>All options below are API-accessible and paid. Prices are indicative where public—not quotes—and production licenses commonly restrict redistribution and derived products.</p></div>
+        <div class="commercial">
+          <article class="commercial-card"><h3>PlanetScope</h3><div class="spec">~3–3.7 m · 4/8 bands · daily land</div><p><b>Access:</b> Data API, STAC and Subscriptions API.</p><p><b>Indicative figures:</b> ~$6/km² archive, ~$12/km² flexible, ~$40/km² assured, from a 2026 comparison article—not an operator price list.<a class="ref" href="#ref-17">[17]</a></p></article>
+          <article class="commercial-card"><h3>Planet SkySat</h3><div class="spec">~0.5 m pan / RGB / NIR · sub-daily tasking</div><p><b>Access:</b> Tasking and archive APIs.</p><p><b>Indicative figure:</b> reseller-cited ~$0.06/acre for archive imagery; reseller-specific, not operator pricing.</p></article>
+          <article class="commercial-card"><h3>Maxar WorldView / GeoEye / Legion</h3><div class="spec">0.31 m pan · 1.24 m MS · Legion 30 cm class</div><p><b>Cadence:</b> Legion claims up to ~15 revisits/day in select areas.</p><p><b>Access & price:</b> MGP Pro / STAC and tasking APIs; quote/subscription enterprise contracts.</p></article>
+          <article class="commercial-card"><h3>Airbus Pléiades Neo</h3><div class="spec">0.3 m pan · 1.2 m MS · 6-band · daily</div><p><b>Access:</b> OneAtlas Data API and tasking.</p><p><b>Price:</b> quote-based subscription/archive licensing.</p></article>
+          <article class="commercial-card"><h3>Airbus Pléiades / SPOT</h3><div class="spec">0.5 / 2 m · 1.5 / 6 m · 1–3 d</div><p><b>Access:</b> OneAtlas; quote-based.</p><p>ESA research quotas are not commercial permission. License from the operator for production.</p></article>
+          <article class="commercial-card"><h3>Commercial SAR</h3><div class="spec">~16 cm claim to 3 m · all weather · tasking</div><p><b>ICEYE:</b> X-band, Gen4 claim down to ~16 cm and sub-15-minute constellation revisit. <b>Capella:</b> 0.5–1.2 m. <b>Umbra:</b> sub-meter. <b>TerraSAR-X / TanDEM-X / PAZ:</b> 1–3 m, 11-day repeat plus tasking.</p><p><b>Access & price:</b> APIs / archive portals; quote or subscription. Capella and Umbra offer some open samples; research access does not imply production rights.</p></article>
+        </div>
+        <div class="callout"><strong>License boundary</strong><p>ESA contributing-mission collections in CDSE, including <code>ccm-optical</code> and <code>ccm-sar</code>, carry purpose-restricted user licenses. Their discoverability does not make them free commercial inputs.</p></div>
+      </section>
+
+      <section id="selection">
+        <div class="section-head"><div><div class="section-num">04 / BEST-DATA LOGIC</div><h2>Select by phenomenon, not by headline GSD</h2></div><p>Choose a tab for the recommended first source, fallback, and specialist layer. The highest-resolution scene is often not the one that answers the question.</p></div>
+        <div class="decision-tabs" role="tablist" aria-label="Use-case selection">
+          <button class="active" role="tab" aria-selected="true" data-tab="vegetation">Vegetation</button><button role="tab" aria-selected="false" data-tab="water">Water</button><button role="tab" aria-selected="false" data-tab="burn">Burn / fire</button><button role="tab" aria-selected="false" data-tab="coast">Coast</button><button role="tab" aria-selected="false" data-tab="thermal">Thermal</button><button role="tab" aria-selected="false" data-tab="elevation">Elevation change</button>
+        </div>
+        <div class="decision-panel active" id="tab-vegetation"><div class="decision-flow"><div class="step"><div class="n">PRIMARY</div><h4>Sentinel-2 MSI</h4><p>Red-edge B5–B7 and B8A for stress and species work at 20 m, with 10 m visible/NIR context.</p></div><div class="step"><div class="n">TIME SERIES</div><h4>HLS v2.0</h4><p>Use the stack-ready 30 m, 2–3 day record for dense phenology and change features.</p></div><div class="step"><div class="n">SPECIALIST</div><h4>Hyperspectral</h4><p>PRISMA, EnMAP, EMIT—or Hyperion archive—for chemistry/species R&amp;D. MODIS VI supports the 2000+ baseline.</p></div></div></div>
+        <div class="decision-panel" id="tab-water"><div class="decision-flow"><div class="step"><div class="n">PRIMARY</div><h4>Sentinel-2 MSI</h4><p>Coastal B1 plus NIR/SWIR water indices at 10–20 m for fine surface-water mapping.</p></div><div class="step"><div class="n">CLOUD / FLOOD</div><h4>Sentinel-1 RTC</h4><p>All-weather flood extent. Landsat DSWE L3 is the ready-made historical surface-water layer.</p></div><div class="step"><div class="n">OCEAN</div><h4>Sentinel-3 OLCI</h4><p>Daily-scale ocean color and chlorophyll; SLSTR, MODIS or VIIRS for sea-surface temperature.</p></div></div></div>
+        <div class="decision-panel" id="tab-burn"><div class="decision-flow"><div class="step"><div class="n">DETECT / ALERT</div><h4>VIIRS + GOES</h4><p>VIIRS/MODIS active fire for global coverage; GOES ABI for minute-scale Western Hemisphere alerts.</p></div><div class="step"><div class="n">SEVERITY</div><h4>Sentinel-2 / Landsat</h4><p>Compute dNBR from NIR and SWIR. S1 can map burns through persistent cloud.</p></div><div class="step"><div class="n">READY PRODUCT</div><h4>CLMS / Landsat L3</h4><p>Daily 300 m CLMS burned area globally; Landsat C2 L3 BA for the US archive.</p></div></div></div>
+        <div class="decision-panel" id="tab-coast"><div class="decision-flow"><div class="step"><div class="n">PRIMARY</div><h4>Sentinel-2 MSI</h4><p>10 m coastal/visible/NIR mapping for shoreline and nearshore condition.</p></div><div class="step"><div class="n">ALL WEATHER</div><h4>Sentinel-1 RTC</h4><p>Waterline and shoreline structure through cloud; interpret with tide state rather than assuming tide independence.</p></div><div class="step"><div class="n">CONTEXT</div><h4>SLSTR + Copernicus DEM</h4><p>Thermal fronts from SLSTR; GLO-30 supplies a coastal surface-elevation baseline.</p></div></div></div>
+        <div class="decision-panel" id="tab-thermal"><div class="decision-flow"><div class="step"><div class="n">DETAIL</div><h4>Landsat ST</h4><p>30 m delivered land-surface temperature, derived from 100 m native TIRS.</p></div><div class="step"><div class="n">DAILY</div><h4>MODIS / VIIRS / SLSTR</h4><p>Trade spatial detail for daily thermal coverage; SLSTR’s dual view is useful in L2 products.</p></div><div class="step"><div class="n">MINUTES</div><h4>GOES ABI</h4><p>Western Hemisphere heat and fire-front evolution at 5–10 minute regional/full-disk cadence.</p></div></div></div>
+        <div class="decision-panel" id="tab-elevation"><div class="decision-flow"><div class="step"><div class="n">BASELINE</div><h4>Copernicus GLO-30</h4><p>Near-global 30 m DSM. Remember that vegetation and buildings are in the surface.</p></div><div class="step"><div class="n">VERTICAL TRUTH</div><h4>GEDI / ICESat-2</h4><p>Sparse footprints for calibration, training and validation—not wall-to-wall change maps.</p></div><div class="step"><div class="n">ACTUAL CHANGE</div><h4>S-1 SLC InSAR / stereo</h4><p>Use repeat Sentinel-1 SLC or commercial stereo. Never difference DSMs of unlike provenance without co-registration.</p></div></div></div>
+      </section>
+
+      <section id="pipeline">
+        <div class="section-head"><div><div class="section-num">05 / PYTHON INGESTION</div><h2>A defensible priority order</h2></div><p>Centralize catalog differences in one adapter layer. Surface processing metadata rather than burying it in dataset-specific code.</p></div>
+        <div class="pipeline">
+          <div class="pipe"><h3>Discover with STAC</h3><p>Open Earth Search or MPC with <code>pystac_client.Client.open(...)</code>. For large AOIs, use MPC GeoParquet item snapshots through <code>adlfs</code> instead of paging the API.</p></div>
+          <div class="pipe"><h3>Sign only when needed</h3><p>Call <code>planetary_computer.sign_inplace(item)</code> for MPC protected assets. Keep AWS requester-pays credentials isolated to the S1 GRD path; prefer free RTC mirrors when phase is not required.</p></div>
+          <div class="pipe"><h3>Window COGs, then cube</h3><p>Use <code>rasterio</code> for single-window range reads; <code>stackstac.stack(...)</code> or <code>odc.stac.load(...)</code> for xarray cubes. Reproject on read to target UTM or an HLS MGRS tile.</p></div>
+          <div class="pipe"><h3>Apply metadata-driven scaling</h3><p>Read each asset’s <code>raster:bands</code> scale and offset. Never hardcode the S2, Landsat reflectance or Landsat temperature transforms.</p></div>
+          <div class="pipe"><h3>Normalize QA and keys</h3><p>S2: SCL or Collection 1 cloud/snow probability. Landsat: <code>qa_pixel</code> bits. HLS: Fmask. Map Earth Search semantic lowercase keys to MPC uppercase IDs in the catalog adapter.</p></div>
+          <div class="pipe"><h3>Preserve native evidence</h3><p>Keep item IDs, collection IDs, processing baseline, scale/offset, CRS and source license with every derived output. Resample 20/60 m S2 only once; reproject GOES explicitly.</p></div>
+        </div>
+        <div class="endpoint-grid" style="margin-top:28px">
+          <div class="endpoint"><b>Element84 Earth Search</b><code>https://earth-search.aws.element84.com/v1/collections</code><span>No auth for discovery; anonymous reads except requester-pays collections.</span></div>
+          <div class="endpoint"><b>Microsoft Planetary Computer</b><code>https://planetarycomputer.microsoft.com/api/stac/v1</code><span>No auth for discovery; some assets need free account SAS signing.</span></div>
+          <div class="endpoint"><b>Copernicus Data Space</b><code>https://stac.dataspace.copernicus.eu/v1/collections</code><span>Free account for S3/HTTPS reads; quotas change.</span></div>
+          <div class="endpoint"><b>USGS Landsat STAC</b><code>https://landsatlook.usgs.gov/stac-server</code><span>No auth; use /stac-server, not the rejected /stac path.</span></div>
+          <div class="endpoint"><b>NASA CMR STAC</b><code>https://cmr.earthdata.nasa.gov/stac</code><span>Open discovery; Earthdata token for downloads.</span></div>
+        </div>
+      </section>
+
+      <section id="references">
+        <div class="section-head"><div><div class="section-num">06 / PROVENANCE</div><h2>Sources, caveats, open questions</h2></div><p>Links below were used in research dated 25 Sep 2026. Collection metadata was inspected live where noted; mission pages support indexed facts.</p></div>
+        <div class="limits"><h3>Not fully verified in this research pass</h3><ul>
+          <li>Exact CDSE free-tier download quotas and request limits; the service is quota-based and published limits can change.</li>
+          <li>Exact CMR STAC collection IDs for MODIS, VIIRS and ASTER granule search; the endpoint is known, but those IDs were not probed live.</li>
+          <li>Sentinel-1D commissioning / operational status after its Nov 2025 launch.</li>
+          <li>ECOSTRESS, Sentinel-5P, Himawari and Meteosat STAC/API details. ECOSTRESS would be relevant to thermal work, but it was not STAC-verified here.</li>
+          <li>Commercial prices are indicative. No listed operator publishes a complete, authoritative price sheet.</li>
+        </ul></div>
+        <ol class="source-list">
+          <li id="ref-1"><b>[1] Earth Search collections · verified live</b><br><a href="https://earth-search.aws.element84.com/v1/collections">https://earth-search.aws.element84.com/v1/collections</a></li>
+          <li id="ref-2"><b>[2] Planetary Computer STAC · verified live</b><br><a href="https://planetarycomputer.microsoft.com/api/stac/v1">https://planetarycomputer.microsoft.com/api/stac/v1</a></li>
+          <li id="ref-3"><b>[3] ESA Sentinel-2 facts</b><br><a href="https://www.esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-2/Facts_and_figures">https://www.esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-2/Facts_and_figures</a></li>
+          <li id="ref-4"><b>[4] CDSE STAC collections · verified live</b><br><a href="https://stac.dataspace.copernicus.eu/v1/collections">https://stac.dataspace.copernicus.eu/v1/collections</a></li>
+          <li id="ref-5"><b>[5] USGS Landsat STAC · verified live</b><br><a href="https://landsatlook.usgs.gov/stac-server">https://landsatlook.usgs.gov/stac-server</a></li>
+          <li id="ref-6"><b>[6] NASA HLS overview</b><br><a href="https://science.nasa.gov/missions/landsat/a-new-and-improved-harmonized-landsat-and-sentinel-2-dataset/">https://science.nasa.gov/missions/landsat/a-new-and-improved-harmonized-landsat-and-sentinel-2-dataset/</a></li>
+          <li id="ref-7"><b>[7] NASA MODIS data</b><br><a href="https://terra.nasa.gov/data/modis-data">https://terra.nasa.gov/data/modis-data</a></li>
+          <li id="ref-8"><b>[8] Earthdata VNP02IMG NRT catalog</b><br><a href="https://www.earthdata.nasa.gov/data/catalog/lancemodis-vnp02img-nrt-2">https://www.earthdata.nasa.gov/data/catalog/lancemodis-vnp02img-nrt-2</a></li>
+          <li id="ref-9"><b>[9] ESA Sentinel-3 instruments</b><br><a href="http://esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-3/Instruments">http://esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-3/Instruments</a></li>
+          <li id="ref-10"><b>[10] NOAA GOES-R ABI</b><br><a href="https://www.goes-r.gov/spacesegment/abi.html">https://www.goes-r.gov/spacesegment/abi.html</a></li>
+          <li id="ref-11"><b>[11] GOES-R on AWS</b><br><a href="https://aws.amazon.com/about-aws/whats-new/2017/08/noaa-goes-r-series-weather-satellite-imagery-is-now-on-aws/">https://aws.amazon.com/about-aws/whats-new/2017/08/noaa-goes-r-series-weather-satellite-imagery-is-now-on-aws/</a></li>
+          <li id="ref-12"><b>[12] Earthdata ASTER L1A catalog</b><br><a href="https://www.earthdata.nasa.gov/data/catalog/lpcloud-ast-l1a-004">https://www.earthdata.nasa.gov/data/catalog/lpcloud-ast-l1a-004</a></li>
+          <li id="ref-13"><b>[13] USGS NAIP imagery layer</b><br><a href="https://www.usgs.gov/media/images/tnmcorps-naip-imagery-layer">https://www.usgs.gov/media/images/tnmcorps-naip-imagery-layer</a></li>
+          <li id="ref-14"><b>[14] Earthdata GEDI02_A catalog</b><br><a href="https://www.earthdata.nasa.gov/data/catalog/lpcloud-gedi02-a-003">https://www.earthdata.nasa.gov/data/catalog/lpcloud-gedi02-a-003</a></li>
+          <li id="ref-15"><b>[15] NICFI program new phase · 28 Jan 2025</b><br><a href="https://www.nicfi.no/2025/01/28/nicfi-satellite-data-program-enters-new-phase/">https://www.nicfi.no/2025/01/28/nicfi-satellite-data-program-enters-new-phase/</a></li>
+          <li id="ref-16"><b>[16] NICFI procurement cancelled · 9 Sep 2025</b><br><a href="https://www.nicfi.no/2025/09/09/norway-cancels-procurement-for-tropical-forest-satellite-data-program/">https://www.nicfi.no/2025/09/09/norway-cancels-procurement-for-tropical-forest-satellite-data-program/</a></li>
+          <li id="ref-17"><b>[17] Public comparison article · indicative Planet figures only</b><br><a href="https://pctechmag.com/2026/06/landviewer-vs-planet-which-satellite-platform-is-built-for-your-work/">https://pctechmag.com/2026/06/landviewer-vs-planet-which-satellite-platform-is-built-for-your-work/</a></li>
+        </ol>
+      </section>
+    </div>
+    <footer>Research snapshot: 25 Sep 2026. Recheck mission status, quotas, commercial quotes and license annexes before deploying a production dependency.</footer>
+  </main>
+</div>
+<script>
+(function(){
+  var filters=document.querySelectorAll('.filter');
+  var cards=document.querySelectorAll('details.source');
+  filters.forEach(function(btn){btn.addEventListener('click',function(){
+    filters.forEach(function(x){x.classList.remove('active')}); btn.classList.add('active');
+    var f=btn.getAttribute('data-filter'); cards.forEach(function(card){var kinds=card.getAttribute('data-kinds').split(' ');card.classList.toggle('hide',f!=='all'&&kinds.indexOf(f)===-1)});
+  })});
+  var tabs=document.querySelectorAll('.decision-tabs button');
+  tabs.forEach(function(btn){btn.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('active');x.setAttribute('aria-selected','false')});
+    document.querySelectorAll('.decision-panel').forEach(function(x){x.classList.remove('active')});
+    btn.classList.add('active');btn.setAttribute('aria-selected','true');document.getElementById('tab-'+btn.getAttribute('data-tab')).classList.add('active');
+  })});
+  var sections=document.querySelectorAll('main section[id], header[id]'); var links=document.querySelectorAll('.rail nav a');
+  if('IntersectionObserver' in window){var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id)})}})},{rootMargin:'-20% 0px -70% 0px'});sections.forEach(function(s){io.observe(s)})}
+})();
+</script>
+</body>
+</html>
