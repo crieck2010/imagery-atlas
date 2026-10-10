@@ -1,3 +1,7 @@
+> [!IMPORTANT]
+> **This repository has been consolidated into the unified [`earthwatch-suite`](https://github.com/crieck2010/earthwatch-suite) monorepo.**
+> Development, CI, and new features continue at [crieck2010/earthwatch-suite](https://github.com/crieck2010/earthwatch-suite).
+
 # Imagery Atlas
 
 A satellite imagery source atlas for the [Earthwatch](https://github.com/crieck2010/earthwatch-suite)
