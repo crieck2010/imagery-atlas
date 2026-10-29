@@ -8,6 +8,8 @@ A satellite imagery source atlas for the [Earthwatch](https://github.com/crieck2
 remote-sensing stack. It answers one question: **for any job, which imagery source should the
 pipeline pull, and how?**
 
+**▶ Live demo: [crieck2010.github.io/imagery-atlas](https://crieck2010.github.io/imagery-atlas/)** — the full atlas in your browser, no install.
+
 Open `index.html` in a browser — it is fully self-contained and works offline. The same file
 doubles as the desktop version: download it and double-click.
 
